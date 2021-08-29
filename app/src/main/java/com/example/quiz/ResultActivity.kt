@@ -1,5 +1,6 @@
 package com.example.quiz
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.quiz.databinding.ActivityResultBinding
@@ -11,6 +12,7 @@ class ResultActivity : AppCompatActivity() {
         binding = ActivityResultBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.HomeButton.setOnClickListener {home() }
         val good = intent.getIntExtra("GOOD",0)
         val allTimer = intent.getLongExtra("ALLTIME",0L)
 
@@ -18,5 +20,12 @@ class ResultActivity : AppCompatActivity() {
         val s = allTimer / 1000L % 60L
         binding.maruQ.text = "${good}/10モン正解！"
         binding.totalTime.text = "%1d:%2$02d".format(m, s)
+
     }
+
+    private fun home() {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+    }
+
 }

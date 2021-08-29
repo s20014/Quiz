@@ -3,4 +3,7 @@
     <string name="start_button_text">スタート</string>
     <string name="Q">Q</string>
     <string name="next_button_text">次の問題へ</string>
+    <string name="total_time">TotalTime</string>
+    <string name="totao_score">TotalScore</string>
+    <string name="home">ホームへ</string>
 </resources>

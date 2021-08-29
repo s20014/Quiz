@@ -13,38 +13,46 @@ import java.io.InputStreamReader
 
 
 class Quiz_view : AppCompatActivity() {
-    val testData = arrayListOf<ArrayList<String>>()
+    var alldata = arrayListOf<ArrayList<String>>()
+    var testData = arrayListOf<ArrayList<String>>()
     var good = 0
     var totalQ = 1
-    val n = 0..(testData.size-1)
+    val n = 0..10
     val qnum = n.shuffled()
     var i = 0
     var allTime = 0L
-    var times = allTimer(100 * 1000L, 100L)
-    var q_times = qtimer(10L * 1000L, 100L)
+    var times = allTimer(100 * 1000L, 100L, allTime)
+    var q_times = qtimer(10L * 1000L, 1000L)
+    val studentName = arrayListOf<String>("sample","s20001","s20002","s20003","s20004","s20005","s20006","s20007","s20008","s20009","s20010","s20011","s20012","s200013","s20014","s20015","s20016","s20017","s20018", "s20019", "s20020","s20021","s20022","s20023","s20024")
 
 
-
-    inner class allTimer(millisInFuture: Long, countDownInterval: Long)
-        : CountDownTimer(millisInFuture, countDownInterval) {
+    inner class allTimer(millisInFuture: Long, countDownInterval: Long , a:Long) :
+        CountDownTimer(millisInFuture, countDownInterval) {
         var fastTime = millisInFuture
+        var a = a
+
+
+
         override fun onTick(unko: Long) {
-            val m = (fastTime - unko) / 1000L / 60L
-            val s = (fastTime - unko) / 1000L % 60L
-            binding.quizTimeCounter.text = "%1d:%2$02d".format(m,s)
-            allTime = fastTime - unko
+            val m = (fastTime - (unko - a) ) / 1000L / 60L
+            val s = (fastTime - (unko - a) ) / 1000L % 60L
+            binding.quizTimeCounter.text = "%1d:%2$02d".format(m, s)
+            allTime = fastTime - (unko - a)
+
         }
 
         override fun onFinish() {
-
         }
     }
-    inner class qtimer(at:Long, inter: Long) :CountDownTimer(at, inter) {
+
+    inner class qtimer(at: Long, inter: Long) : CountDownTimer(at, inter) {
         override fun onTick(millisUntilFinished: Long) {
-            binding.qTimer.progress = (millisUntilFinished / 100) .toInt()
+            binding.qTimer.progress = (millisUntilFinished / 100).toInt()
         }
 
         override fun onFinish() {
+            times.cancel()
+            times = allTimer(100 * 1000L, 100L, allTime)
             dialog(false)
             allfalse()
         }
@@ -60,50 +68,57 @@ class Quiz_view : AppCompatActivity() {
         var a: InputStream? = null
         var z: BufferedReader? = null
 
-        try {
+        for (name in studentName) {
             try {
-                a = assets.open("s20014.csv")
-                z = BufferedReader(InputStreamReader(a))
+                try {
+                    a = assets.open("${name}.csv")
+                    z = BufferedReader(InputStreamReader(a))
+                    var nnn = 0
 
-                do {
-                    var o = arrayListOf<String>()
-                    val e = z.readLine()
-                    for (i in e.split(",")) {
-                        o.add(i)
-                    }
-                    println(o)
-                    testData.add(o)
-                } while (e != null)
-            } finally {
-                a?.close()
-                z?.close()
+                    do {
+                        var o = arrayListOf<String>()
+                        val e = z.readLine()
+                        for (i in e.split(",")) {
+                           o.add(i)
+                        }
+                        if (nnn==0) {
+                            nnn++
+                        }else {
+                            alldata.add(o)
+                        }
+                    } while (e != null)
+                } finally {
+                    a?.close()
+                    z?.close()
+                }
+            } catch (e: Exception) {
+                //println(e)
             }
-        } catch (e: Exception) {
-            println(e)
-        }
+       }
+
+        alldata.shuffle()
+        testData = alldata
 
 
-
-
-      // times.start()
 
 
         //セット
         next()
 
-        //readCsv("s20014.csv")
+
 
         binding.Q1.setOnClickListener {
             clickAnswer(0)
         }
         binding.Q2.setOnClickListener {
-            clickAnswer(0)
+            clickAnswer(1)
         }
         binding.Q3.setOnClickListener {
-            clickAnswer(0)
+            clickAnswer(2)
         }
         binding.Q4.setOnClickListener {
-            clickAnswer(0)
+            clickAnswer(3)
+
         }
         binding.nextButton.setOnClickListener {
             totalQ++
@@ -113,7 +128,7 @@ class Quiz_view : AppCompatActivity() {
                 val intent = Intent(this, ResultActivity::class.java)
                 times.cancel()
                 intent.putExtra("GOOD", good)
-                intent.putExtra("ALLTIME",allTime)
+                intent.putExtra("ALLTIME", allTime)
                 startActivity(intent)
 
             } else {
@@ -152,37 +167,46 @@ class Quiz_view : AppCompatActivity() {
     }
 
     private fun next() {
-        Glide.with(this).load(resources.getIdentifier(testData[qnum[i]][1].split(".")[0], "drawable", packageName)).into(binding.imageView)
-        val count = binding.quizNumber
-        val question = binding.quizText
-        val q1 = binding.Q1
-        val q2 = binding.Q2
-        val q3 = binding.Q3
-        val q4 = binding.Q4
-        val nextButton = binding.nextButton
-        q1.isEnabled = true
-        q2.isEnabled = true
-        q3.isEnabled = true
-        q4.isEnabled = true
-        nextButton.isEnabled = false
+        println(testData[qnum[i]])
+        times.start()
+        Glide.with(this).load(
+            resources.getIdentifier(
+                testData[qnum[i]][1].split(".")[0],
+                "drawable",
+                packageName
+            )
+        ).into(binding.imageView)
+
+        binding.Q1.isEnabled = true
+        binding.Q2.isEnabled = true
+        binding.Q3.isEnabled = true
+        binding.Q4.isEnabled = true
+        binding.nextButton.isEnabled = false
 
         val list = listOf(2, 3, 4, 5).shuffled()
-        count.text = "${totalQ}問目"
-        question.text = testData[qnum[i]][0]
-        q1.text = testData[qnum[i]][list[0]]
-        q2.text = testData[qnum[i]][list[1]]
-        q3.text = testData[qnum[i]][list[2]]
-        q4.text = testData[qnum[i]][list[3]]
+        binding.quizNumber.text = "${totalQ}問目"
+        binding.quizText.text = testData[qnum[i]][0]
+        binding.Q1.text = testData[qnum[i]][list[0]]
+        binding.Q2.text = testData[qnum[i]][list[1]]
+        binding.Q3.text = testData[qnum[i]][list[2]]
+        binding.Q4.text = testData[qnum[i]][list[3]]
         q_times.start()
-
 
 
     }
 
-    private fun clickAnswer(n:Int) {
+    private fun clickAnswer(n: Int) {
         q_times.cancel()
+        times.cancel()
+        times = allTimer(100 * 1000L, 100L, allTime)
+        val Q1 = binding.Q1
+        val Q2 = binding.Q2
+        val Q3 = binding.Q3
+        val Q4 = binding.Q4
 
-        if (binding.Q1.text == testData[qnum[i]][2]) {
+        var button = arrayListOf(Q1, Q2, Q3, Q4)
+
+        if (button[n].text == testData[qnum[i]][2]) {
             dialog(true)
             good++
 
@@ -192,8 +216,6 @@ class Quiz_view : AppCompatActivity() {
         }
         allfalse()
     }
-
-
 }
 
 
